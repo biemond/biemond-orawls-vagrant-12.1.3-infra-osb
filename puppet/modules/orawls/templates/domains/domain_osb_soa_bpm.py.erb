@@ -189,13 +189,16 @@ print('Extend...osb domain with template <%= @templateOSB %>')
 addTemplate('<%= @templateWS %>')
 addTemplate('<%= @templateOSB %>')
 
-print 'Adding SOA Template'
+print 'Adding ApplCore Template'
 addTemplate('<%= @templateApplCore %>')
 
 if WEBLOGIC_VERSION != 1213:
-  addTemplate('<%= @templateJRF %>')
+  #print 'Adding JRF Template'
+  #addTemplate('<%= @templateJRF %>')
+  print 'Adding WSM PM Template'
   addTemplate('<%= @templateWSMPM %>')
 
+print 'Adding SOA Template'
 addTemplate('<%= @templateSOA %>')
 
 if BAM_ENABLED == true:
