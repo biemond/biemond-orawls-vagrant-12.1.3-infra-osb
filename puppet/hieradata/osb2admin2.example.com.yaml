@@ -14,68 +14,80 @@ orawls::weblogic::filename:             "fmw_12.1.3.0.0_infrastructure.jar"
 orawls::weblogic::middleware_home_dir:  *wls_middleware_home_dir
 orawls::weblogic::fmw_infra:            true
 
+logoutput:                     &logoutput                     true
+
+# when you have just one domain on a server
+domain_name:                &domain_name                "osb_domain"
+domain_adminserver:         &domain_adminserver         "AdminServer"
+domain_adminserver_address: &domain_adminserver_address "10.10.10.21"
+domain_adminserver_port:    7001
+domain_nodemanager_port:    &domain_nodemanager_port     5556
+domain_wls_password:        &domain_wls_password         "weblogic1"
+domain_user_config_file:    "/home/oracle/oracle-osb_domain-WebLogicConfig.properties"
+domain_user_key_file:       "/home/oracle/oracle-osb_domain-WebLogicKey.properties"
+
+orautils::nodeMgrPortParam:       *domain_nodemanager_port
+orautils::nodeMgrAddressParam:    *domain_adminserver_address
+orautils::wlsUserParam:           "weblogic"
+orautils::wlsPasswordParam:       *domain_wls_password
+orautils::wlsAdminServerParam:    *domain_adminserver
 orautils::osMdwHomeParam:         *wls_middleware_home_dir
 orautils::osWlHomeParam:          *wls_weblogic_home_dir
 
 orautils::osDomainTypeParam:      "admin"
-orautils::osDomainParam:          "osb_domain"
+orautils::osDomainParam:          *domain_name
 orautils::osDomainPathParam:      "/opt/oracle/wlsdomains/domains/osb_domain"
 orautils::nodeMgrPathParam:       "/opt/oracle/wlsdomains/domains/osb_domain/bin"
 
-orautils::nodeMgrPortParam:       5556
-orautils::nodeMgrAddressParam:    '10.10.10.21'
-orautils::wlsUserParam:           "weblogic"
-orautils::wlsPasswordParam:       "weblogic1"
-orautils::wlsAdminServerParam:    "AdminServer"
-
-logoutput:                     &logoutput                     true
-
-# FMW installation on top of WebLogic 12.1.3
-fmw_installations:
-  'osb1213':
-    version:                 *wls_version
-    fmw_product:             "osb"
-    fmw_file1:               "fmw_12.1.3.0.0_osb_Disk1_1of1.zip"
-    log_output:              true
-    remote_file:             false
-
-
-# when you have just one domain on a server
-domain_name:                "osb_domain"
-domain_adminserver:         "AdminServer"
-domain_adminserver_address: "10.10.10.21"
-domain_adminserver_port:    7001
-domain_nodemanager_port:    5556
-domain_wls_password:        "weblogic1"
-domain_user_config_file:    "/home/oracle/oracle-osb_domain-WebLogicConfig.properties"
-domain_user_key_file:       "/home/oracle/oracle-osb_domain-WebLogicKey.properties"
 
 # create a soa domain
 domain_instances:
   'osb_domain':
+     version:                  *wls_version
      domain_template:          "osb"
      development_mode:         true
      log_output:               *logoutput
-     nodemanager_address:      "10.10.10.21"
+     nodemanager_address:      *domain_adminserver_address
      repository_database_url:  "jdbc:oracle:thin:@osbdb.example.com:1521/osbrepos.example.com"
      repository_prefix:        "DEV"
      repository_password:      "Welcome01"
      repository_sys_password:  "Welcome01"
-     rcu_database_url:         "osbdb.example.com:1521:osbrepos"
+     rcu_database_url:         "osbdb.example.com:1521:osbrepos.example.com"
+
+# fmw cluster 
+fmw_cluster_instances:
+  'osbCluster':
+     version:              *wls_version
+     domain_name:          *domain_name
+     osb_cluster_name:     "OsbCluster"
+     log_output:           *logoutput
+     bpm_enabled:          false
+     bam_enabled:          false
+     soa_enabled:          false
+     osb_enabled:          true
+     repository_prefix:    "DEV"
+
+fmwlogdir_instances:
+  'AdminServer':
+     log_output:      true
+     server:          *domain_adminserver
+  'OsbServer1':
+     log_output:      true
+     server:          'OsbServer1'
 
 # create and startup the nodemanager
 nodemanager_instances:
   'nodemanager':
-     nodemanager_address:  "10.10.10.21"
+     nodemanager_address:  *domain_adminserver_address
      log_output:           *logoutput
 
 # startup adminserver for extra configuration
 control_instances:
   'startWLSAdminServer':
-     domain_name:          "osb_domain"
+     domain_name:          *domain_name
      server_type:          'admin'
      target:               'Server'
-     server:               'AdminServer'
+     server:               *domain_adminserver
      action:               'start'
      log_output:           *logoutput
 
@@ -85,3 +97,56 @@ userconfig_instances:
      log_output:           *logoutput
      user_config_dir:      '/home/oracle'
 
+
+# create 2 machines
+machines_instances:
+  'Node1':
+    ensure:         'present'
+    listenaddress:  *domain_adminserver_address
+    listenport:     *domain_nodemanager_port
+    machinetype:    'UnixMachine'
+    nmtype:         'SSL'
+
+server_vm_args_permsize:      &server_vm_args_permsize     '-XX:PermSize=256m' 
+server_vm_args_max_permsize:  &server_vm_args_max_permsize '-XX:MaxPermSize=512m' 
+server_vm_args_memory:        &server_vm_args_memory       '-Xms752m' 
+server_vm_args_max_memory:    &server_vm_args_max_memory   '-Xmx1024m' 
+
+server_instances:
+  'wlsServer1':
+    ensure:                                'present'
+    arguments:
+           - *server_vm_args_permsize
+           - *server_vm_args_max_permsize
+           - *server_vm_args_memory
+           - *server_vm_args_max_memory
+           - '-Dweblogic.Stdout=/var/log/weblogic/wlsServer1.out'
+           - '-Dweblogic.Stderr=/var/log/weblogic/wlsServer1_err.out'
+
+managed_servers_instances:
+      'OsbServer1':
+         ensure:                         'present'
+         arguments:
+           - *server_vm_args_permsize
+           - *server_vm_args_max_permsize
+           - *server_vm_args_memory
+           - *server_vm_args_max_memory
+           - '-Dweblogic.Stdout=/var/log/weblogic/OsbServer1.out'
+           - '-Dweblogic.Stderr=/var/log/weblogic/OsbServer1_err.out'
+         listenaddress:                  *domain_adminserver_address
+         listenport:                     '8011'
+         logfilename:                    '/data/logs/OsbServer1.log'
+         machine:                        'Node1'
+         sslenabled:                     '1'
+         ssllistenport:                  '8012'
+         sslhostnameverificationignored: '1'
+
+
+# create cluster and assign the managed servers
+cluster_instances:
+      'OsbCluster':
+        ensure:         'present'
+        messagingmode:  'unicast'
+        migrationbasis: 'consensus'
+        servers:        
+          - 'OsbServer1'

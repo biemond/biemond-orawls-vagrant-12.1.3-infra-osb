@@ -1,4 +1,4 @@
-#WebLogic 12.1.3 infra (JRF) with OSB (single server)
+#WebLogic 12.1.3 infra (JRF) with OSB Cluster
 
 ##Details
 - CentOS 6.5 vagrant box

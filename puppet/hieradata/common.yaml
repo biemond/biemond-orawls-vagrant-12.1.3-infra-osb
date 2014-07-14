@@ -46,6 +46,16 @@ orawls::weblogic::source:               *wls_source
 orawls::weblogic::remote_file:          false
 
 
+# FMW installation on top of WebLogic 12.1.3
+fmw_installations:
+  'osb1213':
+    version:                 *wls_version
+    fmw_product:             "osb"
+    fmw_file1:               "fmw_12.1.3.0.0_osb_Disk1_1of1.zip"
+    log_output:              true
+    remote_file:             false
+
+
 # handy WebLogic scripts in /opt/scripts/wls
 orautils::osOracleHomeParam:      *wls_oracle_base_home_dir
 orautils::oraInventoryParam:      "/opt/oracle/oraInventory"
