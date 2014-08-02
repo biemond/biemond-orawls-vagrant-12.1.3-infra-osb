@@ -150,3 +150,11 @@ cluster_instances:
         migrationbasis: 'consensus'
         servers:        
           - 'OsbServer1'
+
+fmwlogdir_instances:
+  'AdminServer':
+     log_output:      true
+     server:          'AdminServer'
+  'OsbServer1':
+     log_output:      true
+     server:          'OsbServer1'
