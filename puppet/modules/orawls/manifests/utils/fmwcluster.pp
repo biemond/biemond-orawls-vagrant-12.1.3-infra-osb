@@ -9,8 +9,8 @@ define orawls::utils::fmwcluster (
   $jdk_home_dir               = hiera('wls_jdk_home_dir'), # /usr/java/jdk1.7.0_45
   $wls_domains_dir            = hiera('wls_domains_dir'           , undef),
   $domain_name                = hiera('domain_name'),
-  $adminserver_name           = hiera('domain_adminserver'        , "AdminServer"),
-  $adminserver_address        = hiera('domain_adminserver_address', "localhost"),
+  $adminserver_name           = hiera('domain_adminserver'        , 'AdminServer'),
+  $adminserver_address        = hiera('domain_adminserver_address', 'localhost'),
   $adminserver_port           = hiera('domain_adminserver_port'   , 7001),
   $nodemanager_port           = hiera('domain_nodemanager_port'   , 5556),
   $soa_cluster_name           = undef,
@@ -20,8 +20,8 @@ define orawls::utils::fmwcluster (
   $bam_enabled                = false, # true|false
   $osb_enabled                = false, # true|false
   $soa_enabled                = false, # true|false
-  $repository_prefix          = hiera('repository_prefix'         , "DEV"),
-  $weblogic_user              = hiera('wls_weblogic_user'         , "weblogic"),
+  $repository_prefix          = hiera('repository_prefix'         , 'DEV'),
+  $weblogic_user              = hiera('wls_weblogic_user'         , 'weblogic'),
   $weblogic_password          = hiera('domain_wls_password'),
   $os_user                    = hiera('wls_os_user'), # oracle
   $os_group                   = hiera('wls_os_group'), # dba
@@ -135,15 +135,18 @@ define orawls::utils::fmwcluster (
         log_output                 => $log_output,
         require                    => Exec["execwlst assignOsbSoaBpmBamToClusters.py ${title}"],
       }
-    } 
+    }
     elsif ( $version <= 1111 ) {
 
       case $::kernel {
         'Linux': {
-          $java_statement = "java"
+          $java_statement = 'java'
         }
         'SunOS': {
-          $java_statement = "java -d64"
+          $java_statement = 'java -d64'
+        }
+        default: {
+          fail("Unrecognized operating system ${::kernel}")
         }
       }
       $javaCommand = "${java_statement} -Dweblogic.security.SSL.ignoreHostnameVerification=true weblogic.WLST -skipWLSModuleScanning "
@@ -160,14 +163,14 @@ define orawls::utils::fmwcluster (
         file { "migrateSecurityStore.py ${domain_name} ${title}":
           ensure  => present,
           path    => "${download_dir}/migrateSecurityStore_${domain_name}.py",
-          content => template("orawls/wlst/wlstexec/fmw/migrateSecurityStore.py.erb"),
+          content => template('orawls/wlst/wlstexec/fmw/migrateSecurityStore.py.erb'),
           replace => true,
           backup  => false,
           mode    => '0775',
           owner   => $os_user,
           group   => $os_group,
         }
-        exec { "execwlst create OPSS store ${domain} ${title}":
+        exec { "execwlst create OPSS store ${domain_name} ${title}":
           command     => "${middleware_home_dir}/oracle_common/common/bin/wlst.sh ${download_dir}/migrateSecurityStore_${domain_name}.py ${weblogic_password}",
           environment => ["JAVA_HOME=${jdk_home_dir}"],
           require     => File["migrateSecurityStore.py ${domain_name} ${title}"],
@@ -233,7 +236,7 @@ define orawls::utils::fmwcluster (
 
         file { "${download_dir}/soa-createUDD${title}.py":
           ensure  => present,
-          content => template("orawls/wlst/wlstexec/fmw/soa-createUDD.py.erb"),
+          content => template('orawls/wlst/wlstexec/fmw/soa-createUDD.py.erb'),
           backup  => false,
           replace => true,
           mode    => '0775',
@@ -250,16 +253,14 @@ define orawls::utils::fmwcluster (
           user        => $os_user,
           group       => $os_group,
           logoutput   => $log_output,
-          require     => [ 
-                          Orawls::Control["ShutdownAdminServerForSoa${title}"],
+          require     => [Orawls::Control["ShutdownAdminServerForSoa${title}"],
                           File["${download_dir}/soa-createUDD${title}.py"],
-                          Exec["execwlst assignOsbSoaBpmBamToClusters.py ${title}"],
-                        ]
+                          Exec["execwlst assignOsbSoaBpmBamToClusters.py ${title}"],],
         }
         # the py script used by the wlst
         file { "${download_dir}/soa-bpm-createUDD${title}.py":
           ensure  => present,
-          content => template("orawls/wlst/wlstexec/fmw/soa-bpm-createUDD.py.erb"),
+          content => template('orawls/wlst/wlstexec/fmw/soa-bpm-createUDD.py.erb'),
           backup  => false,
           replace => true,
           mode    => '0775',
@@ -295,7 +296,7 @@ define orawls::utils::fmwcluster (
         # the py script used by the wlst
         file { "${download_dir}/osb-createUDD${title}.py":
           ensure  => present,
-          content => template("orawls/wlst/wlstexec/fmw/osb-createUDD.py.erb"),
+          content => template('orawls/wlst/wlstexec/fmw/osb-createUDD.py.erb'),
           backup  => false,
           replace => true,
           mode    => '0775',
@@ -352,7 +353,7 @@ define orawls::utils::fmwcluster (
           owner   => $os_user,
           group   => $os_group,
         }
-        exec { "execwlst changeMachineOfAdminserver ${domain} ${title}":
+        exec { "execwlst changeMachineOfAdminserver ${domain_name} ${title}":
           command     => "${middleware_home_dir}/oracle_common/common/bin/wlst.sh ${download_dir}/changeAdminServerNodemanager_${domain_name}.py ${weblogic_password}",
           environment => ["JAVA_HOME=${jdk_home_dir}"],
           before      => Exec["execwlst changeWorkmanagers.py ${title}"],
