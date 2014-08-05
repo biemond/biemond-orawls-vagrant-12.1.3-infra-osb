@@ -135,7 +135,7 @@ managed_servers_instances:
            - '-Dweblogic.Stderr=/var/log/weblogic/OsbServer1_err.out'
          listenaddress:                  *domain_adminserver_address
          listenport:                     '8011'
-         logfilename:                    '/data/logs/OsbServer1.log'
+         logfilename:                    '/var/log/weblogic/OsbServer1.log'
          machine:                        'Node1'
          sslenabled:                     '1'
          ssllistenport:                  '8012'
