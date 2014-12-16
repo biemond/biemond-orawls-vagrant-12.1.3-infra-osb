@@ -1,5 +1,8 @@
 ---
 
+wls_os_user:              &wls_os_user              "oracle"
+wls_weblogic_user:        &wls_weblogic_user        "weblogic"
+
 wls_weblogic_home_dir:    &wls_weblogic_home_dir    "/opt/oracle/middleware12c/wlserver"
 wls_middleware_home_dir:  &wls_middleware_home_dir  "/opt/oracle/middleware12c"
 wls_version:              &wls_version              1213
@@ -54,7 +57,18 @@ domain_instances:
      repository_sys_password:  "Welcome01"
      rcu_database_url:         "osbdb.example.com:1521:osbrepos.example.com"
 
-# fmw cluster 
+wls_setting_instances:
+  'default':
+    user:               *wls_os_user
+    weblogic_home_dir:  *wls_weblogic_home_dir
+    connect_url:        "t3://10.10.10.21:7001"
+    weblogic_user:      *wls_weblogic_user
+    weblogic_password:  *domain_wls_password
+    post_classpath:     '/opt/oracle/middleware12c/oracle_common/modules/internal/features/jrf_wlsFmw_oracle.jrf.wlst_12.1.3.jar'
+    require:            Orawls::Domain[osb_domain]
+
+
+# fmw cluster
 fmw_cluster_instances:
   'osbCluster':
      version:              *wls_version
@@ -74,6 +88,7 @@ fmwlogdir_instances:
   'OsbServer1':
      log_output:      true
      server:          'OsbServer1'
+
 
 # create and startup the nodemanager
 nodemanager_instances:
@@ -107,23 +122,12 @@ machines_instances:
     machinetype:    'UnixMachine'
     nmtype:         'SSL'
 
-server_vm_args_permsize:      &server_vm_args_permsize     '-XX:PermSize=256m' 
-server_vm_args_max_permsize:  &server_vm_args_max_permsize '-XX:MaxPermSize=512m' 
-server_vm_args_memory:        &server_vm_args_memory       '-Xms752m' 
-server_vm_args_max_memory:    &server_vm_args_max_memory   '-Xmx1024m' 
+server_vm_args_permsize:      &server_vm_args_permsize     '-XX:PermSize=256m'
+server_vm_args_max_permsize:  &server_vm_args_max_permsize '-XX:MaxPermSize=512m'
+server_vm_args_memory:        &server_vm_args_memory       '-Xms752m'
+server_vm_args_max_memory:    &server_vm_args_max_memory   '-Xmx1024m'
 
 server_instances:
-  'wlsServer1':
-    ensure:                                'present'
-    arguments:
-           - *server_vm_args_permsize
-           - *server_vm_args_max_permsize
-           - *server_vm_args_memory
-           - *server_vm_args_max_memory
-           - '-Dweblogic.Stdout=/var/log/weblogic/wlsServer1.out'
-           - '-Dweblogic.Stderr=/var/log/weblogic/wlsServer1_err.out'
-
-managed_servers_instances:
       'OsbServer1':
          ensure:                         'present'
          arguments:
@@ -148,13 +152,6 @@ cluster_instances:
         ensure:         'present'
         messagingmode:  'unicast'
         migrationbasis: 'consensus'
-        servers:        
+        servers:
           - 'OsbServer1'
 
-fmwlogdir_instances:
-  'AdminServer':
-     log_output:      true
-     server:          'AdminServer'
-  'OsbServer1':
-     log_output:      true
-     server:          'OsbServer1'
