@@ -67,29 +67,6 @@ wls_setting_instances:
     post_classpath:     '/opt/oracle/middleware12c/oracle_common/modules/internal/features/jrf_wlsFmw_oracle.jrf.wlst_12.1.3.jar'
     require:            Orawls::Domain[osb_domain]
 
-
-# fmw cluster
-fmw_cluster_instances:
-  'osbCluster':
-     version:              *wls_version
-     domain_name:          *domain_name
-     osb_cluster_name:     "OsbCluster"
-     log_output:           *logoutput
-     bpm_enabled:          false
-     bam_enabled:          false
-     soa_enabled:          false
-     osb_enabled:          true
-     repository_prefix:    "DEV"
-
-fmwlogdir_instances:
-  'AdminServer':
-     log_output:      true
-     server:          *domain_adminserver
-  'OsbServer1':
-     log_output:      true
-     server:          'OsbServer1'
-
-
 # create and startup the nodemanager
 nodemanager_instances:
   'nodemanager':
@@ -144,6 +121,7 @@ server_instances:
          sslenabled:                     '1'
          ssllistenport:                  '8012'
          sslhostnameverificationignored: '1'
+         require:                        Wls_machine[Node1]
 
 
 # create cluster and assign the managed servers
@@ -154,4 +132,30 @@ cluster_instances:
         migrationbasis: 'consensus'
         servers:
           - 'OsbServer1'
+        require:
+          - Wls_server[OsbServer1]
+
+
+# fmw cluster
+fmw_cluster_instances:
+  'osbCluster':
+     version:              *wls_version
+     domain_name:          *domain_name
+     osb_cluster_name:     "OsbCluster"
+     log_output:           *logoutput
+     bpm_enabled:          false
+     bam_enabled:          false
+     soa_enabled:          false
+     osb_enabled:          true
+     repository_prefix:    "DEV"
+
+fmwlogdir_instances:
+  'AdminServer':
+     log_output:      true
+     server:          *domain_adminserver
+     require:         Orawls::Utils::Fmwcluster[osbCluster]
+  'OsbServer1':
+     log_output:      true
+     server:          'OsbServer1'
+     require:         Orawls::Utils::Fmwcluster[osbCluster]
 
