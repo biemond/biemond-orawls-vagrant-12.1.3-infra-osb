@@ -26,12 +26,12 @@ module Puppet
 
       def sync
         event = super()
-
+        # rubocop:disable all
         if property = @resource.property(:enable)
           val = property.retrieve
           property.sync unless property.safe_insync?(val)
         end
-
+        # rubocop:enable all
         event
       end
     end
@@ -101,6 +101,16 @@ module Puppet
       desc <<-EOT
         The nodemanager port.
       EOT
+    end
+
+    newparam(:nodemanager_secure_listener) do
+      desc <<-EOT
+        The nodemanager secure listener true or false.
+      EOT
+
+      newvalues(:true, :false)
+
+      defaultto :true
     end
 
     newparam(:jsse_enabled) do

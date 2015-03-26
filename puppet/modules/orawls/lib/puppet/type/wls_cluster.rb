@@ -43,6 +43,7 @@ module Puppet
     parameter :cluster_name
     parameter :timeout
     property :servers
+    property :clusteraddress
     property :migrationbasis
     property :migration_datasource
     property :migration_table_name
@@ -59,6 +60,14 @@ module Puppet
     add_title_attributes(:cluster_name) do
       /^((.*\/)?(.*)?)$/
     end
+
+    #
+    # Manage auto requires
+    #
+    autorequire(:wls_datasource)  {
+      ["#{domain}/#{migration_datasource}",
+       "#{domain}/#{datasourceforjobscheduler}"]
+    }
 
   end
 end
