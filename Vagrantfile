@@ -22,6 +22,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     osb2admin2.vm.network :private_network, ip: "10.10.10.21"
 
+    osb2admin2.vm.provider :vmware_fusion do |vb|
+      vb.vmx["numvcpus"] = "2"
+      vb.vmx["memsize"] = "2548"
+    end
+
     osb2admin2.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "2548"]
       vb.customize ["modifyvm", :id, "--name"  , "osb2admin2"]
@@ -60,6 +65,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     osbdb.vm.synced_folder "/Users/edwin/software", "/software"
 
     osbdb.vm.network :private_network, ip: "10.10.10.5"
+
+    osbdb.vm.provider :vmware_fusion do |vb|
+      vb.vmx["numvcpus"] = "2"
+      vb.vmx["memsize"] = "2548"
+    end
 
     osbdb.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm"     , :id, "--memory", "2548"]

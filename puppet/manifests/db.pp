@@ -109,13 +109,12 @@ class oradb_11g {
       require      => Oradb::Installdb['11.2_linux-x64'],
     }
 
-    oradb::listener{'start listener':
-      oracleBase   => hiera('oracle_base_dir'),
-      oracleHome   => hiera('oracle_home_dir'),
-      user         => hiera('oracle_os_user'),
-      group        => hiera('oracle_os_group'),
-      action       => 'start',
-      require      => Oradb::Net['config net8'],
+    db_listener{ 'startlistener':
+      ensure          => 'running',  # running|start|abort|stop
+      oracle_base_dir => hiera('oracle_base_dir'),
+      oracle_home_dir => hiera('oracle_home_dir'),
+      os_user         => hiera('oracle_os_user'),
+      require         => Oradb::Net['config net8'],
     }
 
     oradb::database{ 'oraDb':
@@ -134,12 +133,14 @@ class oradb_11g {
       recoveryAreaDestination => "/oracle/flash_recovery_area",
       characterSet            => "AL32UTF8",
       nationalCharacterSet    => "UTF8",
-      initParams              => "open_cursors=1000,processes=600,job_queue_processes=4",
+      initParams              => {'open_cursors'        => '1000',
+                                  'processes'           => '600',
+                                  'job_queue_processes' => '4' },
       sampleSchema            => 'FALSE',
       memoryPercentage        => "40",
       memoryTotal             => "800",
       databaseType            => "MULTIPURPOSE",
-      require                 => Oradb::Listener['start listener'],
+      require                 => Db_listener['startlistener'],
     }
 
     oradb::dbactions{ 'start oraDb':
