@@ -55,15 +55,11 @@ module Puppet
     property :redeliverydelay
     property :timetodeliver
     property :timetolive
+    property :forwarddelay
 
     add_title_attributes(:jmsmodule, :queue_name) do
       /^((.*\/)?(.*):(.*)?)$/
     end
-
-    #
-    # Make sure the top level jms module is auto required
-    #
-    autorequire(:wls_jms_module) { jmsmodule }
 
   end
 end

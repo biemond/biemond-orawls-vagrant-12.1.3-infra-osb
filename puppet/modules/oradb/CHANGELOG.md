@@ -1,7 +1,45 @@
 # Version updates
 
+## 1.0.33
+- Small Suse fix for the autostart service
+- new installdb attribute cleanup_installfile
+- option to provide the sys username for RCU
+
+## 1.0.32
+- be able to provide a listener name for starting the oracle listener ( manifest and custom type)
+
+## 1.0.31
+- installasm, stand alone parameter in combination with $gridType == 'CRS_SWONLY' used as standalone or in RAC
+- installasm, .profile fix for ORACLE_SID in case gridType = HA_CONFIG -> +ASM or in gridType = CRS_CONFIG -> +ASM1
+
+## 1.0.30
+- Removed Oracle Home under base check for ASM installations, in CRS_CONFIG or CRS_SWONLY this is not right
+
+## 1.0.29
+- Custom type for oracle db/asm/client/em directory structure instead of using dirtree and some oradb manifests
+
+## 1.0.28
+- fixed database install rsp 12.1.0.2
+- db_listener custom puppet type/provider, listener.pp calls this type
+
+## 1.0.27
+- solaris fix for database.pp and opatch auto
+- puppetDownloadMntPoint parameter for database.pp which can be used for own db template
+
+## 1.0.26
+- Removed createUser functionality in installdb & client, Puppet should do it instead of oradb module
+- Support for 12.1 pluggable database
+- initParams of database.pp now also support a hash besides a comma separated string
+- Refactored dbstructure so it works with multiple oracle homes
+- Goldengate 12.1.2 now uses dbstructure
+
 ## 1.0.25
 - added extra parameter validation to installdb, installasm and installem_agent
+- opatch fix for opatch bundle zip files which has subfolders in the zip
+- owner of the grid home or oracle home folder fix
+- renamed clusterware parameter of the opatch type to opatch_auto
+- StorageType parameter is now also used in the dbca command when using a database template
+- Added ASM 11.2 Database template
 
 ## 1.0.24
 - Enterprise Manager agent install with AgentPull & AgentDeploy

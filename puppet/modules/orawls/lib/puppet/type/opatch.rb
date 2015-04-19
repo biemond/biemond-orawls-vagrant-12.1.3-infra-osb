@@ -22,12 +22,12 @@ module Puppet
 
       def sync
         event = super()
-
+        # rubocop:disable all
         if property = @resource.property(:enable)
           val = property.retrieve
           property.sync unless property.safe_insync?(val)
         end
-
+        # rubocop:enable all
         event
       end
 
@@ -48,7 +48,7 @@ module Puppet
 
     newparam(:oracle_product_home_dir) do
       desc <<-EOT
-        The oracle prodcut home folder.
+        The oracle product home folder.
       EOT
     end
 

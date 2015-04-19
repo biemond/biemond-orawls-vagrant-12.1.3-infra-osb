@@ -26,22 +26,22 @@ class oradb::prepareautostart
   }
 
   case $::operatingsystem {
-    'CentOS', 'RedHat', 'OracleLinux': {
+    'CentOS', 'RedHat', 'OracleLinux', 'SLES': {
       exec { 'chkconfig dbora':
         command   => 'chkconfig --add dbora',
         require   => File['/etc/init.d/dbora'],
         user      => 'root',
-        unless    => "chkconfig | /bin/grep 'dbora'",
+        unless    => 'chkconfig | /bin/grep \'dbora\'',
         path      => $execPath,
         logoutput => true,
       }
     }
-    'Ubuntu', 'Debian', 'SLES':{
+    'Ubuntu', 'Debian':{
       exec { 'update-rc.d dbora':
         command   => 'update-rc.d dbora defaults',
         require   => File['/etc/init.d/dbora'],
         user      => 'root',
-        unless    => "ls /etc/rc3.d/*dbora | /bin/grep 'dbora'",
+        unless    => 'ls /etc/rc3.d/*dbora | /bin/grep \'dbora\'',
         path      => $execPath,
         logoutput => true,
       }

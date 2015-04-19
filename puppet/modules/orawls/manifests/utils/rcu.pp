@@ -13,6 +13,7 @@ define orawls::utils::rcu(
   $rcu_database_url            = undef,   #192.168.50.5:1521:XE
   $rcu_prefix                  = undef,
   $rcu_password                = undef,
+  $rcu_sys_user                = 'sys',
   $rcu_sys_password            = undef,
   $log_output                  = false, # true|false
 ){
@@ -53,13 +54,13 @@ define orawls::utils::rcu(
 
   if !defined(File["${download_dir}/checkrcu.py"]) {
     file { "${download_dir}/checkrcu.py":
-      ensure  => present,
-      source  => 'puppet:///modules/orawls/wlst/checkrcu.py',
-      mode    => '0775',
-      owner   => $os_user,
-      group   => $os_group,
-      backup  => false,
-      before  => Wls_rcu[$rcu_prefix],
+      ensure => present,
+      source => 'puppet:///modules/orawls/wlst/checkrcu.py',
+      mode   => '0775',
+      owner  => $os_user,
+      group  => $os_group,
+      backup => false,
+      before => Wls_rcu[$rcu_prefix],
     }
   }
 
@@ -72,9 +73,10 @@ define orawls::utils::rcu(
 
   wls_rcu{ $rcu_prefix:
     ensure       => $rcu_action,
-    statement    => "${oracle_fmw_product_home_dir}/bin/rcu -silent ${action} -databaseType ORACLE -connectString ${rcu_database_url} -dbUser SYS -dbRole SYSDBA -schemaPrefix ${rcu_prefix} ${components} -f < ${download_dir}/rcu_passwords_${fmw_product}_${rcu_action}_${rcu_prefix}.txt",
+    statement    => "${oracle_fmw_product_home_dir}/bin/rcu -silent ${action} -databaseType ORACLE -connectString ${rcu_database_url} -dbUser ${rcu_sys_user} -dbRole SYSDBA -schemaPrefix ${rcu_prefix} ${components} -f < ${download_dir}/rcu_passwords_${fmw_product}_${rcu_action}_${rcu_prefix}.txt",
     os_user      => $os_user,
     oracle_home  => $oracle_fmw_product_home_dir,
+    sys_user     => $rcu_sys_user,
     sys_password => $rcu_sys_password,
     jdbc_url     => $rcu_jdbc_url,
     jdk_home_dir => $jdk_home_dir,

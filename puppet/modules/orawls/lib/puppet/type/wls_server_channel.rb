@@ -47,21 +47,17 @@ module Puppet
     property :protocol
     property :enabled
     property :listenport
+    property :publicport
     property :listenaddress
     property :publicaddress
     property :httpenabled
     property :outboundenabled
     property :tunnelingenabled
+    property :max_message_size
 
     add_title_attributes(:server, :channel_name) do
       /^((.*\/)?(.*):(.*)?)$/
     end
-
-    #
-    # Make sure the top level jserver is auto required
-    #
-    autorequire(:wls_server) { server }
-
 
   end
 end

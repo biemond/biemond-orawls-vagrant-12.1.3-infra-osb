@@ -7,7 +7,6 @@ define oradb::client(
   $oracleBase              = undef,
   $oracleHome              = undef,
   $dbPort                  = '1521',
-  $createUser              = true,
   $user                    = 'oracle',
   $userBaseDir             = '/home',
   $group                   = 'dba',
@@ -32,10 +31,20 @@ define oradb::client(
     }
   }
 
+  $oraInventory = "${oracleBase}/oraInventory"
+
+  db_directory_structure{"client structure ${version}":
+    ensure            => present,
+    oracle_base_dir   => $oracleBase,
+    ora_inventory_dir => $oraInventory,
+    download_dir      => $downloadDir,
+    os_user           => $user,
+    os_group          => $group_install,
+  }
+
   if ( $continue ) {
 
     $execPath     = '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:'
-    $oraInventory = "${oracleBase}/oraInventory"
 
     if $puppetDownloadMntPoint == undef {
       $mountPoint     = 'puppet:///modules/oradb/'
@@ -43,30 +52,16 @@ define oradb::client(
       $mountPoint     = $puppetDownloadMntPoint
     }
 
-    oradb::utils::dbstructure{"oracle structure ${version}":
-      oracle_base_home_dir => $oracleBase,
-      ora_inventory_dir    => $oraInventory,
-      os_user              => $user,
-      os_group             => $group,
-      os_group_install     => $group_install,
-      os_group_oper        => undef,
-      download_dir         => $downloadDir,
-      log_output           => true,
-      user_base_dir        => $userBaseDir,
-      create_user          => $createUser,
-    }
-
-
     # db file installer zip
     if $remoteFile == true {
       file { "${downloadDir}/${file}":
         ensure  => present,
         source  => "${mountPoint}/${file}",
-        require => Oradb::Utils::Dbstructure["oracle structure ${version}"],
         before  => Exec["extract ${downloadDir}/${file}"],
         mode    => '0775',
         owner   => $user,
         group   => $group,
+        require => Db_directory_structure["client structure ${version}"],
       }
       $source = $downloadDir
     } else {
@@ -74,12 +69,12 @@ define oradb::client(
     }
     exec { "extract ${downloadDir}/${file}":
       command   => "unzip -o ${source}/${file} -d ${downloadDir}/client_${version}",
-      require   => Oradb::Utils::Dbstructure["oracle structure ${version}"],
       timeout   => 0,
       path      => $execPath,
       user      => $user,
       group     => $group,
       logoutput => false,
+      require   => Db_directory_structure["client structure ${version}"],
     }
 
     oradb::utils::dborainst{"oracle orainst ${version}":
@@ -91,10 +86,11 @@ define oradb::client(
       file { "${downloadDir}/db_client_${version}.rsp":
         ensure  => present,
         content => template("oradb/db_client_${version}.rsp.erb"),
-        require => Oradb::Utils::Dborainst["oracle orainst ${version}"],
         mode    => '0775',
         owner   => $user,
         group   => $group,
+        require => [Oradb::Utils::Dborainst["oracle orainst ${version}"],
+                    Db_directory_structure["client structure ${version}"],],
       }
     }
 

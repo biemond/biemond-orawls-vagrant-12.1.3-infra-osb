@@ -46,16 +46,17 @@ orautils::nodeMgrPathParam:       "/opt/oracle/wlsdomains/domains/osb_domain/bin
 # create a soa domain
 domain_instances:
   'osb_domain':
-     version:                  *wls_version
-     domain_template:          "osb"
-     development_mode:         true
-     log_output:               *logoutput
-     nodemanager_address:      *domain_adminserver_address
-     repository_database_url:  "jdbc:oracle:thin:@osbdb.example.com:1521/osbrepos.example.com"
-     repository_prefix:        "DEV"
-     repository_password:      "Welcome01"
-     repository_sys_password:  "Welcome01"
-     rcu_database_url:         "osbdb.example.com:1521:osbrepos.example.com"
+    version:                  *wls_version
+    domain_template:          "osb"
+    ess_enabled:              true
+    development_mode:         true
+    log_output:               *logoutput
+    nodemanager_address:      *domain_adminserver_address
+    repository_database_url:  "jdbc:oracle:thin:@osbdb.example.com:1521/osbrepos.example.com"
+    repository_prefix:        "DEV"
+    repository_password:      "Welcome01"
+    repository_sys_password:  "Welcome01"
+    rcu_database_url:         "osbdb.example.com:1521:osbrepos.example.com"
 
 wls_setting_instances:
   'default':
@@ -105,23 +106,23 @@ server_vm_args_memory:        &server_vm_args_memory       '-Xms752m'
 server_vm_args_max_memory:    &server_vm_args_max_memory   '-Xmx1024m'
 
 server_instances:
-      'OsbServer1':
-         ensure:                         'present'
-         arguments:
-           - *server_vm_args_permsize
-           - *server_vm_args_max_permsize
-           - *server_vm_args_memory
-           - *server_vm_args_max_memory
-           - '-Dweblogic.Stdout=/var/log/weblogic/OsbServer1.out'
-           - '-Dweblogic.Stderr=/var/log/weblogic/OsbServer1_err.out'
-         listenaddress:                  *domain_adminserver_address
-         listenport:                     '8011'
-         logfilename:                    '/var/log/weblogic/OsbServer1.log'
-         machine:                        'Node1'
-         sslenabled:                     '1'
-         ssllistenport:                  '8012'
-         sslhostnameverificationignored: '1'
-         require:                        Wls_machine[Node1]
+  'OsbServer1':
+     ensure:                         'present'
+     arguments:
+       - *server_vm_args_permsize
+       - *server_vm_args_max_permsize
+       - *server_vm_args_memory
+       - *server_vm_args_max_memory
+       - '-Dweblogic.Stdout=/var/log/weblogic/OsbServer1.out'
+       - '-Dweblogic.Stderr=/var/log/weblogic/OsbServer1_err.out'
+     listenaddress:                  *domain_adminserver_address
+     listenport:                     '8011'
+     logfilename:                    '/var/log/weblogic/OsbServer1.log'
+     machine:                        'Node1'
+     sslenabled:                     '1'
+     ssllistenport:                  '8012'
+     sslhostnameverificationignored: '1'
+     require:                        Wls_machine[Node1]
 
 
 # create cluster and assign the managed servers
@@ -136,26 +137,26 @@ cluster_instances:
           - Wls_server[OsbServer1]
 
 
-# fmw cluster
-fmw_cluster_instances:
-  'osbCluster':
-     version:              *wls_version
-     domain_name:          *domain_name
-     osb_cluster_name:     "OsbCluster"
-     log_output:           *logoutput
-     bpm_enabled:          false
-     bam_enabled:          false
-     soa_enabled:          false
-     osb_enabled:          true
-     repository_prefix:    "DEV"
+# # fmw cluster
+# fmw_cluster_instances:
+#   'osbCluster':
+#      version:              *wls_version
+#      domain_name:          *domain_name
+#      osb_cluster_name:     "OsbCluster"
+#      log_output:           *logoutput
+#      bpm_enabled:          false
+#      bam_enabled:          false
+#      soa_enabled:          false
+#      osb_enabled:          true
+#      repository_prefix:    "DEV"
 
-fmwlogdir_instances:
-  'AdminServer':
-     log_output:      true
-     server:          *domain_adminserver
-     require:         Orawls::Utils::Fmwcluster[osbCluster]
-  'OsbServer1':
-     log_output:      true
-     server:          'OsbServer1'
-     require:         Orawls::Utils::Fmwcluster[osbCluster]
+# fmwlogdir_instances:
+#   'AdminServer':
+#      log_output:      true
+#      server:          *domain_adminserver
+#      require:         Orawls::Utils::Fmwcluster[osbCluster]
+#   'OsbServer1':
+#      log_output:      true
+#      server:          'OsbServer1'
+#      require:         Orawls::Utils::Fmwcluster[osbCluster]
 
