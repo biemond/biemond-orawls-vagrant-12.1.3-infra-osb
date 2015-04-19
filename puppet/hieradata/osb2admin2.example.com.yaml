@@ -48,7 +48,7 @@ domain_instances:
   'osb_domain':
     version:                  *wls_version
     domain_template:          "osb"
-    ess_enabled:              true
+    ess_enabled:              false
     development_mode:         true
     log_output:               *logoutput
     nodemanager_address:      *domain_adminserver_address
@@ -137,26 +137,26 @@ cluster_instances:
           - Wls_server[OsbServer1]
 
 
-# # fmw cluster
-# fmw_cluster_instances:
-#   'osbCluster':
-#      version:              *wls_version
-#      domain_name:          *domain_name
-#      osb_cluster_name:     "OsbCluster"
-#      log_output:           *logoutput
-#      bpm_enabled:          false
-#      bam_enabled:          false
-#      soa_enabled:          false
-#      osb_enabled:          true
-#      repository_prefix:    "DEV"
+# fmw cluster
+fmw_cluster_instances:
+  'osbCluster':
+     version:              *wls_version
+     domain_name:          *domain_name
+     osb_cluster_name:     "OsbCluster"
+     log_output:           *logoutput
+     bpm_enabled:          false
+     bam_enabled:          false
+     soa_enabled:          false
+     osb_enabled:          true
+     repository_prefix:    "DEV"
 
-# fmwlogdir_instances:
-#   'AdminServer':
-#      log_output:      true
-#      server:          *domain_adminserver
-#      require:         Orawls::Utils::Fmwcluster[osbCluster]
-#   'OsbServer1':
-#      log_output:      true
-#      server:          'OsbServer1'
-#      require:         Orawls::Utils::Fmwcluster[osbCluster]
+fmwlogdir_instances:
+  'AdminServer':
+     log_output:      true
+     server:          *domain_adminserver
+     require:         Orawls::Utils::Fmwcluster[osbCluster]
+  'OsbServer1':
+     log_output:      true
+     server:          'OsbServer1'
+     require:         Orawls::Utils::Fmwcluster[osbCluster]
 
