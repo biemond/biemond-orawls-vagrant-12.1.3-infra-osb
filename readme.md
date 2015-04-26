@@ -1,10 +1,10 @@
-#WebLogic 12.1.3 infra (JRF) with OSB Cluster
+#WebLogic 12.1.3 infra (JRF) with OSB ,ESS Cluster
 
 ##Details
-- CentOS 6.5 vagrant box
-- Puppet 3.5.0
+- CentOS 6.7 vagrant box
+- Puppet 3.7.4
 - Vagrant >= 1.41
-- Oracle Virtualbox >= 4.3.6 
+- Oracle Virtualbox >= 4.3.6
 
 Download & Add the all the Oracle binaries to /software
 
@@ -33,6 +33,6 @@ http://10.10.10.21:7001/em with weblogic1 as password
 
 ###software
 - JDK 1.7u55 jdk-7u55-linux-x64.tar.gz
-- JDK 7 JCE policy UnlimitedJCEPolicyJDK7.zip  
+- JDK 7 JCE policy UnlimitedJCEPolicyJDK7.zip
 - fmw_12.1.3.0.0_infrastructure.jar
 - fmw_12.1.3.0.0_osb_Disk1_1of1.zip

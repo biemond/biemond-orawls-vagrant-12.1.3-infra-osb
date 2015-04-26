@@ -48,7 +48,7 @@ domain_instances:
   'osb_domain':
     version:                  *wls_version
     domain_template:          "osb"
-    ess_enabled:              false
+    ess_enabled:              true
     development_mode:         true
     log_output:               *logoutput
     nodemanager_address:      *domain_adminserver_address
@@ -123,18 +123,43 @@ server_instances:
      ssllistenport:                  '8012'
      sslhostnameverificationignored: '1'
      require:                        Wls_machine[Node1]
+  'EssServer1':
+     ensure:                         'present'
+     arguments:
+       - *server_vm_args_permsize
+       - *server_vm_args_max_permsize
+       - *server_vm_args_memory
+       - *server_vm_args_max_memory
+       - '-Dweblogic.Stdout=/var/log/weblogic/EssServer1.out'
+       - '-Dweblogic.Stderr=/var/log/weblogic/EssServer1_err.out'
+     listenaddress:                  *domain_adminserver_address
+     listenport:                     '8021'
+     logfilename:                    '/var/log/weblogic/EssServer1.log'
+     machine:                        'Node1'
+     sslenabled:                     '1'
+     ssllistenport:                  '8022'
+     sslhostnameverificationignored: '1'
+     require:                        Wls_machine[Node1]
 
 
 # create cluster and assign the managed servers
 cluster_instances:
-      'OsbCluster':
-        ensure:         'present'
-        messagingmode:  'unicast'
-        migrationbasis: 'consensus'
-        servers:
-          - 'OsbServer1'
-        require:
-          - Wls_server[OsbServer1]
+  'OsbCluster':
+    ensure:         'present'
+    messagingmode:  'unicast'
+    migrationbasis: 'consensus'
+    servers:
+      - 'OsbServer1'
+    require:
+      - Wls_server[OsbServer1]
+  'EssCluster':
+    ensure:         'present'
+    messagingmode:  'unicast'
+    migrationbasis: 'consensus'
+    servers:
+      - 'EssServer1'
+    require:
+      - Wls_server[EssServer1]
 
 
 # fmw cluster
@@ -143,11 +168,13 @@ fmw_cluster_instances:
      version:              *wls_version
      domain_name:          *domain_name
      osb_cluster_name:     "OsbCluster"
+     ess_cluster_name:     "EssCluster"
      log_output:           *logoutput
      bpm_enabled:          false
      bam_enabled:          false
      soa_enabled:          false
      osb_enabled:          true
+     ess_enabled:          true
      repository_prefix:    "DEV"
 
 fmwlogdir_instances:
@@ -158,5 +185,9 @@ fmwlogdir_instances:
   'OsbServer1':
      log_output:      true
      server:          'OsbServer1'
+     require:         Orawls::Utils::Fmwcluster[osbCluster]
+  'EssServer1':
+     log_output:      true
+     server:          'EssServer1'
      require:         Orawls::Utils::Fmwcluster[osbCluster]
 
