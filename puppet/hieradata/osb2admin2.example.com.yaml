@@ -147,7 +147,7 @@ cluster_instances:
   'OsbCluster':
     ensure:         'present'
     messagingmode:  'unicast'
-    migrationbasis: 'consensus'
+    migrationbasis: 'database'
     servers:
       - 'OsbServer1'
     require:
@@ -155,7 +155,7 @@ cluster_instances:
   'EssCluster':
     ensure:         'present'
     messagingmode:  'unicast'
-    migrationbasis: 'consensus'
+    migrationbasis: 'database'
     servers:
       - 'EssServer1'
     require:
